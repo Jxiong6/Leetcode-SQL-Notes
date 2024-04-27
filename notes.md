@@ -40,3 +40,35 @@ where e1.ManagerId = e2.Id and e1.salary >  e2.salary
 >;
 >```
 
+
+
+### [182. 查找重复的电子邮箱](https://leetcode.cn/problems/duplicate-emails/)
+
+```sql
+select email as Email
+from Person
+group by Email 
+having count(Email) >1
+```
+
+
+
+### [183. 从不订购的客户](https://leetcode.cn/problems/customers-who-never-order/)
+
+```sql
+select a.name as Customers
+from Customers a left join Orders b on a.id = b.customerId 
+where b.customerId is null 
+```
+
+
+
+### [511. 游戏玩法分析 I](https://leetcode.cn/problems/game-play-analysis-i/)
+
+```sql
+select player_id, min(event_date) first_login
+from activity
+group by player_id
+
+```
+
