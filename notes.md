@@ -72,3 +72,104 @@ group by player_id
 
 ```
 
+
+
+### [586. 订单最多的客户](https://leetcode.cn/problems/customer-placing-the-largest-number-of-orders/)
+
+```sql
+select customer_number
+from Orders 
+group by customer_number
+order by count(*) desc
+limit 1
+```
+
+
+
+>note : 
+
+desc 降序  asc 升序 
+
+
+
+
+
+###  [607. 销售员](https://leetcode.cn/problems/sales-person/)
+
+```sql
+SELECT  s.name
+FROM SalesPerson s
+where s.sales_id not in
+(SELECT o.sales_id
+FROM Orders AS o join Company AS c on o.com_id = c.com_id
+where c.name = 'RED')
+
+```
+
+> note:
+
+子查询 
+
+### [627. 变更性别](https://leetcode.cn/problems/swap-salary/)
+
+```sql
+# 1.
+UPDATE Salary 
+set 
+sex = case sex when 'm' then 'f' else 'm' end 
+
+# 2.
+update salary set sex = if(sex='m','f','m');
+```
+
+
+
+>note:  动态设置 可以在使用CASE... WHEN... 的时候同时使用UPDATE语句
+>
+>case...when...
+
+
+
+```sql
+case 列名 
+	when ..then ..
+	when ..then ..
+	else..
+end 
+```
+
+UPDATE： 
+
+```sql
+update 表名
+set 列名 = 修改后的值；
+```
+
+
+
+### [1050. 合作过至少三次的演员和导演](https://leetcode.cn/problems/actors-and-directors-who-cooperated-at-least-three-times/)
+
+```sql
+select actor_id, director_id 
+from actordirector
+group by actor_id, director_id
+having count(*)>=3
+```
+
+
+
+### [196. 删除重复的电子邮箱](https://leetcode.cn/problems/delete-duplicate-emails/)
+
+```sql
+DELETE a
+FROM Person a, Person b
+WHERE a.id >b.id  and a.email = b.email
+```
+
+> note：
+>
+> 自连接例子： 
+>
+> ![image-20240428224238263](C:\Users\xiong\AppData\Roaming\Typora\typora-user-images\image-20240428224238263.png)
+>
+> sql执行顺序 ： FROM > WHERE > GROUP BY > HAVING > SELECT >DISTINCT > ORDER BY > LIMIT/OFFSET 
