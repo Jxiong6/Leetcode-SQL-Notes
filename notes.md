@@ -166,10 +166,12 @@ FROM Person a, Person b
 WHERE a.id >b.id  and a.email = b.email
 ```
 
-> note：
+> note：自连接例子：
 >
-> 自连接例子： 
+>  ![](C:\Users\xiong\Desktop\Leetcode-SQL-Notes\images\image-20240428224238263.png)
 >
-> ![image-20240428224238263](C:\Users\xiong\AppData\Roaming\Typora\typora-user-images\image-20240428224238263.png)
+> 
+>
+> 
 >
 > sql执行顺序 ： FROM > WHERE > GROUP BY > HAVING > SELECT >DISTINCT > ORDER BY > LIMIT/OFFSET 
