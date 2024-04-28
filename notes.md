@@ -168,7 +168,7 @@ WHERE a.id >b.id  and a.email = b.email
 
 > note：自连接例子：
 >
->  ![](C:\Users\xiong\Desktop\Leetcode-SQL-Notes\images\image-20240428224238263.png)
+>  ![](.\images\image-20240428224238263.png)
 >
 > 
 >
