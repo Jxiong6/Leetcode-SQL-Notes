@@ -168,7 +168,7 @@ WHERE a.id >b.id  and a.email = b.email
 
 > note：自连接例子：
 >
->  ![test](.\images\image-20240428224238263.png)
+>  ![test](./images/image-20240428224238263.png)
 >
 > 
 >
