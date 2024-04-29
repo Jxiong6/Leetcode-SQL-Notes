@@ -175,3 +175,66 @@ WHERE a.id >b.id  and a.email = b.email
 > 
 >
 > sql执行顺序 ： FROM > WHERE > GROUP BY > HAVING > SELECT >DISTINCT > ORDER BY > LIMIT/OFFSET 
+
+### [197. 上升的温度](https://leetcode.cn/problems/rising-temperature/)
+
+``` sql
+select  a.id
+from weather as a , weather as b 
+where datediff(a.recordDate, b.recordDate) =1 
+and a.Temperature > b.Temperature
+```
+
+
+
+> note:
+>
+> DATEDIFF(endDate, startDate) -- 返回两个日期之间的天数差异
+>
+> TIMEDIFF(time1, time2) -- 计算两个时间之间的差异
+>
+> DATE_ADD(date, INTERVAL expr type), DATE_SUB() -- 在日期上加上或减去一个指定的时间间隔
+
+
+
+### [577. 员工奖金](https://leetcode.cn/problems/employee-bonus/)
+
+```sql 
+select e.name, b.bonus
+from Employee as e left join  Bonus as b on e.empId = b.empId 
+where b.bonus < 1000 or b.bonus is null
+```
+
+
+
+###  [584. 寻找用户推荐人](https://leetcode.cn/problems/find-customer-referee/)
+
+```sql
+select name 
+from customer 
+where referee_id !=2 or referee_id is null 
+```
+
+
+
+### [595. 大的国家](https://leetcode.cn/problems/big-countries/)
+
+```sql
+select name,population, area
+from world
+where area >= 3000000 or population >= 25000000
+```
+
+
+
+
+
+### [596. 超过5名学生的课](https://leetcode.cn/problems/classes-more-than-5-students/)
+
+```sql
+select class
+from courses 
+group by class 
+having count(student) >=5
+```
+
