@@ -238,3 +238,85 @@ group by class
 having count(student) >=5
 ```
 
+
+
+### [610. Triangle Judgement](https://leetcode.com/problems/triangle-judgement/)
+
+```sql
+SELECT x, y, z , if(x + y > z and x + z > y and y + z > x ,'Yes', 'No') as triangle 
+FROM Triangle 
+```
+
+
+
+> note:
+>
+> Mysql中使用if ：
+>
+> ```sql
+> IF(expression, value_if_true, value_if_false)
+> ```
+
+
+
+### [619. Biggest Single Number](https://leetcode.com/problems/biggest-single-number/)
+
+```sql
+select max(num) as num
+from (select num
+	  from MyNumbers 
+      group by num 
+      having count(*) =1 ) as new 
+
+```
+
+> note: 
+>
+> ![](./images/4714ca5f6692c6f5c4b9948cfc890d6.png)
+
+
+
+### [620. Not Boring Movies](https://leetcode.com/problems/not-boring-movies/)
+
+```sql
+select *
+from Cinema 
+where id%2 =1 and description != 'boring'
+order by rating desc
+```
+
+> note:
+>
+> is not 和!=的区别 =》 !=用于两个非null值不相等时返回true , is not 通常用于特殊比较is not null ； is not true 
+>
+> 例如：
+>
+> ```sql
+> select true is not true #会返回0
+> select false is not true #会返回1 
+> ```
+
+
+
+### [1068. Product Sales Analysis I](https://leetcode.com/problems/product-sales-analysis-i/)
+
+
+
+```sql
+select p.product_name, s.year ,s.price 
+from sales as s join product as p on s.product_id = p.product_id 
+```
+
+
+
+### [1075. Project Employees I](https://leetcode.com/problems/project-employees-i/)
+
+
+
+```sql
+select project_id , round(avg(experience_years),2) as average_years
+from project as p join employee as e on p.employee_id = e.employee_id
+group by project_id  
+
+```
+
