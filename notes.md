@@ -320,3 +320,191 @@ group by project_id
 
 ```
 
+
+
+### [1084. Sales Analysis III](https://leetcode.com/problems/sales-analysis-iii/) 
+
+```sql
+select p.product_id, p.product_name 
+from product as p join sales as s on p.product_id = s.product_id 
+group by s.product_id
+HAVING MIN(s.sale_date) >= "2019-01-01" AND MAX(s.sale_date) <= "2019-03-31"
+```
+
+> note:
+>
+> 在使用group by 分组之后，having子句通常与聚合函数一起使用（SUM, AVG, MIN, MAX ）
+
+
+
+### [1141. User Activity for the Past 30 Days I](https://leetcode.com/problems/user-activity-for-the-past-30-days-i/)
+
+```SQL
+select activity_date as day, count(distinct user_id) as active_users 
+from Activity
+where activity_date between '2019-06-28' and '2019-07-27' 
+group by day
+
+```
+
+>NOTE:
+>
+>在group by 之前可以先使用where条件进行筛选。
+
+
+
+### [1148. Article Views I](https://leetcode.com/problems/article-views-i/)
+
+```sql
+select distinct author_id as id 
+from views
+where author_id = viewer_id
+order by author_id asc
+```
+
+### [1179. Reformat Department Table](https://leetcode.com/problems/reformat-department-table/)
+
+```sql
+SELECT id,
+SUM(CASE WHEN month = 'Jan' THEN revenue ELSE NULL END) AS Jan_Revenue,
+SUM(CASE WHEN month = 'Feb' THEN revenue ELSE NULL END) AS Feb_Revenue,
+SUM(CASE WHEN month = 'Mar' THEN revenue ELSE NULL END) AS Mar_Revenue,
+SUM(CASE WHEN month = 'Apr' THEN revenue ELSE NULL END) AS Apr_Revenue,
+SUM(CASE WHEN month = 'May' THEN revenue ELSE NULL END) AS May_Revenue,
+SUM(CASE WHEN month = 'Jun' THEN revenue ELSE NULL END) AS Jun_Revenue,
+SUM(CASE WHEN month = 'Jul' THEN revenue ELSE NULL END) AS Jul_Revenue,
+SUM(CASE WHEN month = 'Aug' THEN revenue ELSE NULL END) AS Aug_Revenue,
+SUM(CASE WHEN month = 'Sep' THEN revenue ELSE NULL END) AS Sep_Revenue,
+SUM(CASE WHEN month = 'Oct' THEN revenue ELSE NULL END) AS Oct_Revenue,
+SUM(CASE WHEN month = 'Nov' THEN revenue ELSE NULL END) AS Nov_Revenue,
+SUM(CASE WHEN month = 'Dec' THEN revenue ELSE NULL END) AS Dec_Revenue
+FROM Department 
+GROUP BY id
+ORDER BY id;
+```
+
+>note : 
+>
+>```sql
+>CASE
+>    WHEN condition1 THEN result1
+>    WHEN condition2 THEN result2
+>    ...
+>    ELSE resultN -- 可选
+>END
+>
+>```
+
+
+
+### [1211. Queries Quality and Percentage](https://leetcode.com/problems/queries-quality-and-percentage/)
+
+```sql
+select query_name,round(sum(rating/position)/count(query_name),2) as quality ,round(sum(case when rating <3 then 1 else 0 end)/count(query_name)*100,2) as poor_query_percentage
+from queries 
+where query_name is not null
+group by query_name
+```
+
+
+
+
+
+### [1251. Average Selling Price](https://leetcode.com/problems/average-selling-price/)
+
+```sql
+select  p.product_id,  COALESCE(round(sum(p.price*u.units)/sum(u.units),2),0) as average_price
+from prices as p  left join unitssold u on p.product_id = u.product_id and u.purchase_date between p.start_date and p.end_date
+group by p.product_id
+```
+
+> note:
+>
+> `COALESCE` 是一个 SQL 函数，用于从其参数列表中返回第一个非 `NULL` 值。如果所有给定的参数都是 `NULL`，则 `COALESCE` 函数也会返回 `NULL`。这个函数非常有用，特别是在处理可能包含 `NULL` 值的数据时，它可以帮助避免在应用逻辑上的错误或中断。
+
+
+
+
+
+### [1280. Students and Examinations](https://leetcode.com/problems/students-and-examinations/)
+
+```sql
+select new.student_id, new.student_name, new.subject_name, count(e.subject_name) as attended_exams
+from
+(select * from students cross join subjects) as new  left join examinations as e on new.student_id = e.student_id and new.subject_name = e.subject_name
+group by new.student_id, new.subject_name
+order by new.student_id, new.subject_name
+```
+
+> note:
+>
+> 题目中需要找到每个学生参加每项考试的数量
+>
+> 所以首先将包含student_id, student_name  的Students表 和包含subject_name的Subjects表进行cross join 成为new表
+>
+> ```sql
+> select * from students cross join subjects
+> ```
+>
+> 得到每个学生都和不同的学科有交集
+>
+> 然后使用left join 和包含student_id subject_name 的表Examinations。
+>
+> left join的条件是student_id subject_name 相同。 这样方便之后对参与科目的数量进行统计
+>
+> ```sql
+> (select * from students cross join subjects) as new  left join examinations as e on new.student_id = e.student_id and new.subject_name = e.subject_name
+> ```
+>
+> 然后使用
+>
+> ```sql
+> group by new.student_id, new.subject_name
+> order by new.student_id, new.subject_name
+> ```
+>
+> 因为以上的group by
+>
+> 最后统计参与的次数使用count(e.subject_name)
+>
+> ```sql
+> select new.student_id, new.student_name, new.subject_name, count(e.subject_name) as attended_exams
+> from
+> (select * from students cross join subjects) as new  left join examinations as e on new.student_id = e.student_id and new.subject_name = e.subject_name
+> group by new.student_id, new.subject_name
+> order by new.student_id, new.subject_name
+> 
+> ```
+
+
+
+### [1327. List the Products Ordered in a Period](https://leetcode.com/problems/list-the-products-ordered-in-a-period/)
+
+```sql
+select p.product_name,sum(o.unit) as unit
+from products p join orders o on p.product_id = o.product_id 
+where o.order_date between '2020-02-01' and '2020-02-29'
+group by o.product_id
+having sum(o.unit)>=100
+```
+
+
+
+### [1378. Replace Employee ID With The Unique Identifier](https://leetcode.com/problems/replace-employee-id-with-the-unique-identifier/)
+
+```sql
+select en.unique_id, e.name
+from Employees e left join EmployeeUNI en on e.id = en.id 
+```
+
+
+
+### [1407. Top Travellers](https://leetcode.com/problems/top-travellers/)
+
+```sql
+select u.name, coalesce(sum(r.distance),0) as  travelled_distance 
+from users u left join rides r on u.id = r.user_id 
+group by u.id 
+order by coalesce(sum(r.distance),0) desc, u.name asc 
+```
+
