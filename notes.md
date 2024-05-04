@@ -508,3 +508,95 @@ group by u.id
 order by coalesce(sum(r.distance),0) desc, u.name asc 
 ```
 
+
+
+
+
+### [1484. Group Sold Products By The Date](https://leetcode.com/problems/group-sold-products-by-the-date/)
+
+```sql
+select sell_date, count(distinct product) as num_sold, group_concat(distinct product order by product asc separator ',') as products
+from activities 
+group by sell_date 
+order by sell_date asc
+```
+
+> note:
+>
+> concat(str1,str,....)函数：将多个字符串连接成一个字符串
+>
+> concat_ws(separator，str1,str2,..)函数：分隔符不能为null
+>
+> group_concat ([distinct] 要连接的字段[ order by 排序字段 asc/desc ] [separator ' 分隔符'])：将group by产生的同一个分组中的值连接起来，返回一个字符串结果。
+
+
+
+### [1517. Find Users With Valid E-Mails](https://leetcode.com/problems/find-users-with-valid-e-mails/)
+
+```sql
+select *
+from Users
+where mail  REGEXP '^[A-Za-z][A-Za-z0-9_\.\-]*@leetcode(\\?com)?\\.com$' 
+```
+
+> note: 
+>
+> 正则表达式：
+>
+> 反斜杠 `\\` 用来转义
+>
+> ^ : 从字符串开始匹配的regexp模式
+>
+> [A-Za-z] ： 匹配大小写
+>
+> [A-Za-z0-9_\\.\\-]*  ：匹配第一字母后的任意字符（大小写，数字，下划线，句号，破折号）
+>
+> (\\\\ ?com)? 使?com 成为可选项 允许模式同时匹配 "@leetcode.com "和"@leetcode?com"
+>
+> $： regex模式结束
+
+
+
+
+
+### [1527. Patients With a Condition](https://leetcode.com/problems/patients-with-a-condition/)
+
+```sql
+select *
+from patients 
+where conditions like '%_% DIAB1%' or conditions like 'DIAB1%'
+```
+
+> note:
+>
+> 通配符匹配： like '%_%' 
+>
+> - `%`：表示在字符串的开头或结尾可以包含任意数量的字符，或没有字符。
+> - `_`：中间必须有一个字符。
+
+
+
+### [1581. Customer Who Visited but Did Not Make Any Transactions](https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/)
+
+```sql
+select Visits.customer_id, count(customer_id) as count_no_trans
+from Visits  left join Transactions on Visits.visit_id=Transactions.visit_id
+where transaction_id is null
+group by customer_id
+```
+
+
+
+
+
+### [1587. Bank Account Summary II](https://leetcode.com/problems/bank-account-summary-ii/)
+
+
+
+```SQL
+select u.name as NAME, SUM(t.amount) as BALANCE
+from Users u left join transactions t on u.account = t.account 
+group by u.name
+having sum(t.amount) > 10000
+```
+
