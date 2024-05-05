@@ -600,3 +600,90 @@ group by u.name
 having sum(t.amount) > 10000
 ```
 
+
+
+
+
+### [1633. Percentage of Users Attended a Contest](https://leetcode.com/problems/percentage-of-users-attended-a-contest/)
+
+```sql
+select r.contest_id, round((count(distinct r.user_id)*100)/(select count(user_id) from users),2) as  percentage
+from register r  
+group by r.contest_id
+order by  percentage desc, contest_id asc 
+```
+
+
+
+
+
+### [1661. Average Time of Process per Machine](https://leetcode.com/problems/average-time-of-process-per-machine/)
+
+```sql
+select a1.machine_id, round(avg(a2.timestamp - a1.timestamp),3) as processing_time
+from activity a1 join activity a2 
+on a1.machine_id = a2.machine_id and a1.process_id = a2.process_id and a1.activity_type = 'start' and a2.activity_type = 'end'
+group by a1.machine_id
+
+```
+
+>note:
+>
+>count()括号里不能直接使用条件，但可以使用case when .. then.. else.. end 
+
+
+
+### [1667. Fix Names in a Table](https://leetcode.com/problems/fix-names-in-a-table/)
+
+```sql
+select user_id, concat(upper(left(name,1)),lcase(substring(name,2))) as name 
+from users
+order by user_id 
+```
+
+>note:
+>
+>upper()转换成大写 
+>
+>left（name，1）从左第一个
+>
+>lcase（）小写
+>
+>substring（name,2）从name第二个字符开始提取子字符串
+
+
+
+
+
+### [1683. Invalid Tweets](https://leetcode.com/problems/invalid-tweets/)
+
+```sql
+select tweet_id
+from tweets 
+where length(content)>15
+```
+
+
+
+### [1693. Daily Leads and Partners](https://leetcode.com/problems/daily-leads-and-partners/)
+
+```sql
+select date_id, make_name,count(distinct lead_id)as unique_leads,count(distinct partner_id) unique_partners
+from dailysales 
+group by date_id,make_name
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
