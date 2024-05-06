@@ -677,9 +677,63 @@ group by date_id,make_name
 
 
 
+### [1729. Find Followers Count](https://leetcode.com/problems/find-followers-count/)
+
+```sql
+select user_id,count(follower_id) as followers_count
+from followers
+group by user_id
+order by user_id asc
+```
 
 
 
+### [1731. The Number of Employees Which Report to Each Employee](https://leetcode.com/problems/the-number-of-employees-which-report-to-each-employee/)
+
+```sql
+select e1.employee_id, e1.name, count(e2.reports_to) as reports_count,round(avg(e2.age),0) as average_age
+from employees e1 join employees e2 on e1.employee_id = e2.reports_to 
+group by e2.reports_to
+order by e1.employee_id
+```
+
+
+
+### [1741. Find Total Time Spent by Each Employee](https://leetcode.com/problems/find-total-time-spent-by-each-employee/)
+
+```sql 
+select event_day as day, emp_id, sum(out_time-in_time) as total_time 
+from employees 
+group by event_day, emp_id 
+```
+
+
+
+### [1757. Recyclable and Low Fat Products](https://leetcode.com/problems/recyclable-and-low-fat-products/)
+
+```sql
+select product_id
+from Products
+where low_fats = 'Y' and recyclable = 'Y'
+```
+
+
+
+### [1789. Primary Department for Each Employee](https://leetcode.com/problems/primary-department-for-each-employee/)
+
+```sql
+SELECT employee_id, department_id 
+FROM Employee
+WHERE primary_flag = 'Y'UNION
+SELECT employee_id, department_id 
+FROM Employee
+GROUP BY employee_id
+HAVING COUNT(department_id) = 1;
+```
+
+> note:
+>
+> `UNION` 是用于合并两个或多个 `SELECT` 语句的结果集的操作符。`UNION` 会去除重复的行，但如果需要保留重复的行，可以使用 `UNION ALL`。
 
 
 
