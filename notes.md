@@ -739,5 +739,85 @@ HAVING COUNT(department_id) = 1;
 
 
 
+### [1795. Rearrange Products Table](https://leetcode.com/problems/rearrange-products-table/)
 
+```sql
+select product_id , 'store1' as store, store1 as price 
+from Products
+where store1 is not null 
+union
+select product_id , 'store2' as store, store2 as price 
+from Products
+where store2 is not null 
+union
+select product_id , 'store3' as store, store3 as price 
+from Products
+where store3 is not null 
+```
+
+
+
+### [1873. Calculate Special Bonus](https://leetcode.com/problems/calculate-special-bonus/)
+
+```sql
+select employee_id,case when employee_id%2 = 1 and name not like 'M%' then salary else 0 end as bonus
+from employees
+order by employee_id
+```
+
+
+
+> note:
+>
+> 使用字符匹配的时候用Like 或者 not like
+
+
+
+### [1890. The Latest Login in 2020](https://leetcode.com/problems/the-latest-login-in-2020/)
+
+```sql
+select user_id,max(time_stamp) as last_stamp
+from logins 
+where time_stamp like '2020-%'
+group by user_id
+```
+
+
+
+### [1965. Employees With Missing Information](https://leetcode.com/problems/employees-with-missing-information/)
+
+```sql
+select distinct employee_id 
+from(select employee_id 
+from employees
+union
+select employee_id
+from salaries) as new 
+where employee_id not in 
+(select e. employee_id
+from employees e join salaries s on e.employee_id = s.employee_id )
+order by employee_id asc
+```
+
+
+
+### [1978. Employees Whose Manager Left the Company](https://leetcode.com/problems/employees-whose-manager-left-the-company/)
+
+```sql
+select employee_id
+from employees
+where manager_id not in (select distinct employee_id
+from employees ) and salary< 30000
+order by employee_id asc
+```
+
+
+
+### [2356. Number of Unique Subjects Taught by Each Teacher](https://leetcode.com/problems/number-of-unique-subjects-taught-by-each-teacher/)
+
+```sql
+select teacher_id,count(distinct subject_id) cnt
+from teacher 
+group by teacher_id
+```
 
