@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 ### [175. 组合两个表](https://leetcode.cn/problems/combine-two-tables/)
 
 ```sql
@@ -820,4 +824,191 @@ select teacher_id,count(distinct subject_id) cnt
 from teacher 
 group by teacher_id
 ```
+
+
+
+
+
+
+
+
+
+***Medium***
+
+### [176. Second Highest Salary](https://leetcode.com/problems/second-highest-salary/)
+
+```sql
+select max(salary) SecondHighestSalary
+from employee
+where salary !=
+(select max(salary)
+from employee )
+```
+
+
+
+
+
+### [177. Nth Highest Salary](https://leetcode.com/problems/nth-highest-salary/)
+
+```sql
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+declare m int;
+    set m = N-1;
+    RETURN(
+        select distinct salary 
+        from employee
+        order by salary desc
+        limit m,1
+    );
+END
+```
+
+
+
+> note :
+>
+> 如何写函数体：
+>
+> ```sql
+> CREATE FUNCTION function_name(parameter_name parameter_type) RETURNS return_type 
+> BEGIN
+> --函数体
+>  	DECLARE variable_name variable_type;
+>  	SET variable_name = value;
+>  	RETURN (expression);
+> END
+> ```
+>
+> 解题思路：
+>
+> 如何找到第N高薪资？
+>
+> 查找第 n 高薪资的查询涉及按降序对不同的薪资进行排序，并将结果限制在第 n 行。这里我们从 N 减去 1，因为 SQL 索引从 0 开始。
+>
+> 注： limit 后只能跟具体数值，不能跟表达式，比如这道题limit后不能直接使用limit N-1，1
+
+
+
+### [178. Rank Scores](https://leetcode.com/problems/rank-scores/)
+
+```sql
+SELECT
+  S.score,
+  DENSE_RANK() OVER (
+    ORDER BY
+      S.score DESC
+  ) AS 'rank'
+FROM
+  Scores S;
+```
+
+窗口函数：
+
+DENSE_RANK() - 分配连续的排名，对等项视为并列并获得相同的排名
+
+```sql
+<窗口函数> over (partition by <用于分组的列名> order by <排名>)
+```
+
+
+
+### [180. Consecutive Numbers](https://leetcode.com/problems/consecutive-numbers/)
+
+```sql
+select distinct(a) as ConsecutiveNums
+from(
+    select lead(Num,1)over(order by id) as a,
+    Num as b,
+    lag(Num,1)over(order by id ) as c,
+    id AS current_id,
+    LEAD(id, 1) OVER (ORDER BY id) AS next_id,
+    LAG(id, 1) OVER (ORDER BY id) AS prev_id
+    from logs 
+)t
+where t.a = t.b and t.a = t.c AND (t.current_id = t.prev_id + 1) AND (t.current_id = t.next_id - 1)
+```
+
+
+
+窗口函数：
+
+- lead(列名，offset, 默认值)：向后偏移 offset 的列值；
+- lag(列名，offset, 默认值) ：向前偏移 offset 的列值；
+
+
+
+
+
+### [184. Department Highest Salary](https://leetcode.com/problems/department-highest-salary/)
+
+```sql
+select new.department,new.employee,new.salary
+from(select d.name as department, e.name as employee, e.salary as salary, Max(e.salary) over (partition by d.id) as max_salary
+from employee e join department d on e.departmentId = d.id
+)as new
+where new.salary = new.max_salary
+```
+
+
+
+### [550. Game Play Analysis IV](https://leetcode.com/problems/game-play-analysis-iv/)
+
+```sql
+select round(count(new.player_id)/(select count(distinct player_id) from activity),2) as fraction 
+from(select  player_id,event_date,dense_rank () over (partition by player_id order by event_date asc) as first_log
+from activity ) as new join activity as a on date_add(new.event_date, interval 1 day) = a.event_date
+where new.first_log =1 and new.player_id = a.player_id
+```
+
+> note: count()聚合的函数只有一行
+
+
+
+### [608. Tree Node](https://leetcode.com/problems/tree-node/)
+
+```sql
+select id,case when p_id is null then 'Root' when id not in (select p_id from tree where p_id is not null) then 'Leaf' else 'Inner' end  as type
+```
+
+我们也可以使用'in' 代替'not in'
+
+```sql
+select id,case when p_id is null then 'Root' when id in (select p_id from tree ) then 'Inner' else 'Leaf' end  as type
+```
+
+这里为什么使用not in的时候需要后面的值不为null 而使用in的时候后面可以为空呢？ 我们就需要介绍一下SQL的三值逻辑
+
+在三值逻辑中 我们有true false 以及unknown
+
+比如 3 not in (1,2,3,null)就可以化简成为
+
+3!=1 and 3!=2 and 3!=3 and 3!=null (比较两个空值或将空值与其他任何值进行比较均返回 unknown)
+
+继续=> (true and true and) false and null 
+
+=>false
+
+
+
+
+
+3 in(1,2,3,null) 
+
+=> 3=1 or 3=2 or 3=3 or 3=null 
+
+=>false or false or true or null
+
+=> true
+
+![0512](./images/0512.png)
+
+
+
+
+
+
+
+
 
