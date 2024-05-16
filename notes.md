@@ -970,12 +970,14 @@ where new.first_log =1 and new.player_id = a.player_id
 
 ```sql
 select id,case when p_id is null then 'Root' when id not in (select p_id from tree where p_id is not null) then 'Leaf' else 'Inner' end  as type
+from tree
 ```
 
 我们也可以使用'in' 代替'not in'
 
 ```sql
 select id,case when p_id is null then 'Root' when id in (select p_id from tree ) then 'Inner' else 'Leaf' end  as type
+from tree
 ```
 
 这里为什么使用not in的时候需要后面的值不为null 而使用in的时候后面可以为空呢？ 我们就需要介绍一下SQL的三值逻辑
@@ -992,8 +994,6 @@ select id,case when p_id is null then 'Root' when id in (select p_id from tree )
 
 
 
-
-
 3 in(1,2,3,null) 
 
 => 3=1 or 3=2 or 3=3 or 3=null 
@@ -1004,11 +1004,304 @@ select id,case when p_id is null then 'Root' when id in (select p_id from tree )
 
 ![0512](./images/0512.png)
 
+[Null (SQL) - Wikipedia](https://en.wikipedia.org/wiki/Null_(SQL))
 
 
 
+### [626. Exchange Seats](https://leetcode.com/problems/exchange-seats/)
+
+```sql
+select case when id%2=0 then id-1 when id%2=1 and id = (select max(id) from seat )then id else id+1 end as id,student
+from seat
+order by id asc
+```
 
 
 
+聚合函数不能使用id=max(id) 而应该用子查询
 
 
+
+### [1045. 买下所有产品的客户](https://leetcode.cn/problems/customers-who-bought-all-products/)
+
+```sql
+select distinct customer_id
+from Customer 
+where product_key in(select product_key from Product)
+group by customer_id 
+having count(distinct product_key)=(select count(*) from Product)
+```
+
+[MySQL外键约束（FOREIGN KEY）是什么？-CSDN博客](https://blog.csdn.net/qq_42534026/article/details/106158803)
+
+本题中customer表（从表）的product_keys是表product表的foreign key
+
+在product表（主表）中product_key是主键
+
+外键性质：
+
+从删主不删 主删从不见 无法在从表中插入主表中不存在的主键
+
+
+
+### [570. Managers with at Least 5 Direct Reports](https://leetcode.com/problems/managers-with-at-least-5-direct-reports/)
+
+```sql
+select name
+from employee
+where id in(select managerId
+from employee
+group by managerId
+having count(managerId)>=5)
+```
+
+
+
+### [585. Investments in 2016](https://leetcode.com/problems/investments-in-2016/)
+
+```sql
+select round(sum(tiv_2016),2) tiv_2016 from insurance 
+where tiv_2015 in(
+                    select tiv_2015 from insurance group by tiv_2015 having count(*)>1)
+and concat(lat,lon) in(
+                    select concat(lat,lon)
+                    from insurance 
+                    group by lat,lon
+                    having count(*)=1 
+                      )
+```
+
+
+
+### [602. Friend Requests II: Who Has the Most Friends](https://leetcode.com/problems/friend-requests-ii-who-has-the-most-friends/)
+
+```sql
+SELECT id, COUNT(*) as num
+FROM (
+    SELECT requester_id AS id FROM RequestAccepted
+    UNION ALL
+    SELECT accepter_id AS id FROM RequestAccepted
+) AS combined
+GROUP BY id
+ORDER BY num DESC
+LIMIT 1;
+```
+
+
+
+### [1070. Product Sales Analysis III](https://leetcode.com/problems/product-sales-analysis-iii/)
+
+```sql
+select  product_id,year as first_year,quantity,price
+from (select product_id,dense_rank() over (partition by product_id order by year asc ) as a,quantity,year,price from sales) as new
+where new.product_id in (select product_id from Product) and a=1
+
+```
+
+或者使用CTE
+
+```sql
+WITH CTE AS (
+    SELECT product_id, MIN(year) AS minyear FROM Sales 
+    GROUP BY product_id 
+)
+
+SELECT s.product_id, s.year AS first_year, s.quantity, s.price 
+FROM Sales s
+INNER JOIN CTE ON cte.product_id = s.product_id  AND s.year = cte.minyear; 
+```
+
+
+
+### [1158. Market Analysis I](https://leetcode.com/problems/market-analysis-i/)
+
+```sql
+with cte as (select * from Users as u left join (select * from orders where year(order_date)='2019' ) as o on u.user_id = o.buyer_id )
+select cte.user_id as buyer_id, cte.join_date, count(cte.order_id) as orders_in_2019  from cte group by cte.user_id
+
+```
+
+count(null)结果恒为0
+
+count(1)和count(*) 的值是非null的数量
+
+
+
+### [1164. Product Price at a Given Date](https://leetcode.com/problems/product-price-at-a-given-date/)
+
+```sql
+select new.product_id,new.new_price  as price
+from (select product_id, (dense_rank () over(partition by product_id order by change_date desc)) as rank1 ,new_price
+from products
+where change_date < '2019-08-17' ) as new
+where rank1=1
+union
+select product_id, 10 as price
+from products
+group by product_id
+having min(change_date) >'2019-08-16'
+```
+
+
+
+> 关键点：
+
+*UNION*:  是用于合并两个或多个查询的结果集，并自动去除重复的行。
+
+*UNION ALL*: 也用于合并查询结果，但不去除任何行，即保留所有的重复行。
+
+*INTERSECT*: 返回同时存在于两个查询结果集中的行
+
+*EXCEPT*: 返回存在于第一个查询结果集中但不存在于第二个查询结果集中的行
+
+
+
+### [1174. Immediate Food Delivery II](https://leetcode.com/problems/immediate-food-delivery-ii/)
+
+
+
+```sql
+select round(count(*)*100/ (select count(distinct customer_id) from delivery ),2) as immediate_percentage
+from (select dense_rank() over (partition by customer_id order by order_date asc) as rank1, customer_id,order_date,customer_pref_delivery_date 
+from delivery) as new
+where new.rank1 = 1 and new.order_date =new.customer_pref_delivery_date
+```
+
+注意distinct
+
+### [1193. Monthly Transactions I](https://leetcode.com/problems/monthly-transactions-i/)
+
+```sql
+select trans_date as month, country, count(*) as trans_count, sum(state='approved') as approved_count, sum(amount) as trans_total_amount, sum(if(state='approved',amount,0)) as approved_total_amount 
+from (select id,country,state,amount,SUBSTRING(trans_date,1,7) as trans_date
+from transactions ) as a
+group by a.trans_date, country
+```
+
+注意：
+
+count(0)还是等于1，所以需要用count(if(...,1,null)) 
+
+
+
+### [1204. Last Person to Fit in the Bus](https://leetcode.com/problems/last-person-to-fit-in-the-bus/)
+
+```sql
+select person_name
+from
+    (select
+    person_name,
+    sum(weight) over(order by turn) as Total_Weight
+    from Queue)tmp
+where Total_Weight<=1000
+order by Total_Weight desc limit 1
+```
+
+
+
+窗口函数sum()可以实现累加求和
+
+
+
+### [1321. Restaurant Growth](https://leetcode.com/problems/restaurant-growth/)
+
+关键点：窗口函数，滑动窗口
+
+参考链接：https://leetcode.cn/problems/restaurant-growth/solutions/1047332/jiang-jie-bing-gai-jin-ping-lun-qu-da-la-34xv
+
+首先理解题意，计算七天窗口内消费者付的平均金额。
+
+了解一下窗口函数，之前我们一直没有用到窗口滑动的数据范围。
+
+```sql
+[你要的操作] OVER ( PARTITION BY  <用于分组的列名>
+                    ORDER BY <按序叠加的列名> 
+                    ROWS <窗口滑动的数据范围> )
+```
+
+**<窗口滑动的数据范围> 用来限定[ 你要的操作] 所运用的数据的范围，具体有如下这些：**
+
+```sql
+当前行 - current row
+之前的行 - preceding
+之后的行 - following
+无界限 - unbounded
+表示从前面的起点 - unbounded preceding
+表示到后面的终点 - unbounded following
+```
+
+举个例子：
+
+```sql
+取当前行和前五行：ROWS between 5 preceding and current row --共6行
+取当前行和后五行：ROWS between current row and 5 following --共6行
+取前五行和后五行：ROWS between 5 preceding and 5 folowing --共11行
+```
+
+本题中，要按照日期累计金额，从当天算起一共7天。
+
+可以理解成操作是累计金额，按序叠加的列是日期，窗口内的函数要取当前行和前6行。
+
+需要注意的是：
+
+- 即使前边的数据不够，窗口函数也会将范围内的数据框住并计算，因此需要最后手动地只要能够完整框住7天的情况。
+- 另外比较阴损的是，本题的数据中存在着某一日有多个消费的情况，这样一来即使窗口照旧向前取6天就无法覆盖被挤出去的数据了，因此，需要构建一个小表格用来存放每天的金额总量 【绊子2】
+
+
+
+```sql
+SELECT DISTINCT visited_on,
+       sum_amount AS amount, 
+       ROUND(sum_amount/7, 2) AS average_amount
+-- 以上是破解【绊子1】并计算平均值，少用一次窗口函数提高运行速度
+FROM (
+    SELECT visited_on, 
+       SUM(amount) OVER ( ORDER BY visited_on ROWS/RANGE 6 PRECEDING ) AS sum_amount
+    -- 以下是计算每天的金额总量，破解【绊子2】
+    FROM (
+        SELECT visited_on, 
+            SUM(amount) AS amount
+        FROM Customer
+        GROUP BY visited_on
+         ) TT
+     ) LL
+-- 最后手动只要覆盖完整7天的数据，破解【绊子1】
+WHERE DATEDIFF(visited_on, (SELECT MIN(visited_on) FROM Customer)) >= 6
+```
+
+- 首先计算每天的金额总量，存储在一个子查询表格中
+
+- 利用滑动窗口，计算每七天的金额总量
+
+- 最后利用where过滤能够覆盖完整7天的数据
+
+  这里我们少使用了窗口函数来提高运行速度，可以直接除以7。
+
+
+
+### [1341. Movie Rating](https://leetcode.com/problems/movie-rating/)
+
+
+
+```sql
+(select u.name  as results 
+from Users as u join MovieRating as m on u.user_id = m.user_id
+group by m.user_id
+order by count(m.user_id) desc ,u.name
+limit 1 )
+union all
+(select m1.title as results 
+from MovieRating  m join movies m1 on m.movie_id = m1.movie_id
+where substring(m.created_at,1,7)='2020-02'
+group by m.movie_id  
+order by sum(m.rating)/count(m.movie_id) desc ,m1.title asc 
+limit 1 )
+```
+
+注意电影名和顾客重名 ，需要使用union all 包含重复的行
+
+having后只能使用聚合函数 
+
+sum(m.rating)/count(m.movie_id) 可以直接使用avg(m.rating)替换。
+
+lexicographically 字典序
